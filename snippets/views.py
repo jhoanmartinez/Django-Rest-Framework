@@ -11,6 +11,16 @@ from snippets.serializers import SnippetSerializer
 @api_view(['GET', 'POST'])
 def snippet_list(request):
     """
-    List all code snippets, or create a new snippet.
+    Get and add all the users
     """
-   
+    if request.method == 'GET':
+        snippets = Snippet.objects.all()
+        serializer = SnippetSerializer(snippets, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = SnippetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
