@@ -1,3 +1,4 @@
+from django.http.response import Http404
 from django.shortcuts import render
 
 # Create your views here.
@@ -28,19 +29,20 @@ class SnippetList(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SnippetDetail(APIView):
-    def get_object(self, request, pk, format=None):
+    def get_object(self, pk):
         try:
-            snnipet = Snippet.objects.filter(pk=pk)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
+            raise Http404
     
     def get(self, request, pk, format=None):
         snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, many=True)
+        serializer = SnippetSerializer(snippet)
         return Response(serializer.data)
 
+
     def put(self, request, pk, format=None):
-        snippet = self.get_object(self, pk, request, format=None)
+        snippet = self.get_object(pk)
         serializer = SnippetSerializer(snippet, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -48,9 +50,10 @@ class SnippetDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        snippet = self.get_object(self, request, pk, format=None)
+        snippet = self.get_object(pk)
         snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 
