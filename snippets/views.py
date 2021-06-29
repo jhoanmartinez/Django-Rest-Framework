@@ -19,7 +19,7 @@ class SnippetList(APIView):
             serializer = SnippetSerializer(snnipets, many=True)
             return Response(serializer.data)
     
-    def post(self, request):
+    def post(self, request, format=None):
         if request.method == "POST":
             serializer = SnippetSerializer(data=request.data)
             if serializer.is_valid():
