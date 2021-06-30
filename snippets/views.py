@@ -7,9 +7,14 @@ from rest_framework.response import Response
 from snippets.serializers import *
 from snippets.models import *
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from rest_framework import permissions
+from snippets.permissions import IsOwnerOrReadOnly
 
 
 class SnippetList(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
     def get(self, request, format=None):
         """
         snnipets list
@@ -19,7 +24,13 @@ class SnippetList(APIView):
             serializer = SnippetSerializer(snnipets, many=True)
             return Response(serializer.data)
     
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+    
     def post(self, request, format=None):
+        """
+        Create new snippet
+        """
         if request.method == "POST":
             serializer = SnippetSerializer(data=request.data)
             if serializer.is_valid():
@@ -28,19 +39,21 @@ class SnippetList(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SnippetDetail(APIView):
-    def get_object(self, request, pk, format=None):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_object(self, pk):
         try:
-            snnipet = Snippet.objects.filter(pk=pk)
+            snippet = Snippet.objects.get(pk=pk)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     
     def get(self, request, pk, format=None):
         snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, many=True)
+        serializer = SnippetSerializer(snippet)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        snippet = self.get_object(self, pk, request, format=None)
+        snippet = self.get_object(pk)
         serializer = SnippetSerializer(snippet, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -48,7 +61,7 @@ class SnippetDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        snippet = self.get_object(self, request, pk, format=None)
+        snippet = self.get_object(pk)
         snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
