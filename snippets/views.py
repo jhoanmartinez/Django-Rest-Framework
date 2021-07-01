@@ -13,7 +13,9 @@ from snippets.permissions import IsOwnerOrReadOnly
 
 
 class SnippetList(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
 
     def get(self, request, format=None):
         """
@@ -39,7 +41,8 @@ class SnippetList(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SnippetDetail(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
