@@ -11,7 +11,6 @@ from django.contrib.auth.models import User
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly
 
-
 class SnippetList(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
