@@ -10,64 +10,41 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly
+from rest_framework.decorators import api_view
+from rest_framework.reverse import reverse
+from rest_framework import generics
+from rest_framework import renderers
 
+class SnippetHighlight(generics.GenericAPIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    queryset = Snippet.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
 
-class SnippetList(APIView):
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        # 'snippets':reverse('snippetd', request=request, format=format)
+        "list":"snippets/",
+        "detail":"snippets/id/",
+        "highlighted":"snippets/id/highlight/",
+    })
+
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
 
-
-    def get(self, request, format=None):
-        """
-        snnipets list
-        """
-        if request.method == "GET":
-            snnipets = Snippet.objects.all()
-            serializer = SnippetSerializer(snnipets, many=True)
-            return Response(serializer.data)
-    
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-    
-    def post(self, request, format=None):
-        """
-        Create new snippet
-        """
-        if request.method == "POST":
-            serializer = SnippetSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class SnippetDetail(APIView):
+class SnippetList(generics.ListCreateAPIView):
     # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
-
-    def get_object(self, pk):
-        try:
-            return Snippet.objects.get(pk=pk)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
     
-    def get(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        snippet.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 
