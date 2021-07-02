@@ -27,10 +27,8 @@ class SnippetHighlight(generics.GenericAPIView):
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
-        # 'snippets':reverse('snippetd', request=request, format=format)
-        "list":"snippets/",
-        "detail":"snippets/id/",
-        "highlighted":"snippets/id/highlight/",
+        'users': reverse('user-list', request=request, format=format),
+        'snippets': reverse('snippet-list', request=request, format=format)
     })
 
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -44,6 +42,16 @@ class SnippetList(generics.ListCreateAPIView):
     # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = [permissions, IsOwnerOrReadOnly]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class UserList(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
     
 
 
