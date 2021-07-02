@@ -10,6 +10,9 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly
+from rest_framework import generics
+from snippets.serializers import UserSerializer
+
 
 class SnippetList(APIView):
     # permission_classes = [permissions.IsAuthenticated]
@@ -66,6 +69,15 @@ class SnippetDetail(APIView):
         snippet = self.get_object(pk)
         snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 
